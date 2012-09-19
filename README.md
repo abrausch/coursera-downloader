@@ -9,4 +9,4 @@ Usage: coursera-downloader.rb <username> <password> <course-name>
 
 You see the course name in the browser:
 
-https://class.coursera.org/__progfun-2012-001__/lecture/index
+https://class.coursera.org/progfun-2012-001/lecture/index  Here is progfun-2012-001 the course name
