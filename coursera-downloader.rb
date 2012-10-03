@@ -24,15 +24,33 @@ agent.submit(login_form, login_form.buttons.first)
 content_site = agent.get("https://class.coursera.org/#{course_name}/lecture/index")
 agent.pluggable_parser.default = Mechanize::Download
 
-# Download all PDF and mp4 files to the current directory
+# Download all files to the current directory
 content_site.links.each do |link|
   unless (link.uri.to_s =~ URI::regexp).nil?
     uri = link.uri.to_s
-
-    if (uri =~ /\.mp4/) || (uri =~ /\.pdf/)
-      p "Downloading #{uri}"
-      agent.get(uri).save()
-      p "Finished"
+    filename = ""
+    if (uri =~ /\.mp4/) || (uri =~ /\.srt/) || (uri =~ /\.pdf/) || (uri =~ /\.pptx/)
+     begin
+       head = agent.head(uri)
+     rescue Mechanize::ResponseCodeError => exception
+       if exception.response_code == '403'
+         filename = URI.decode(exception.page.filename).gsub(/.*filename=\"(.*)\"+?.*/, '\1')
+       else
+         raise exception # Some other error, re-raise
+       end
+     else
+      filename = head.filename
+      filename = URI.decode(filename.gsub(/http.*\//,"")).gsub("_", " ").gsub("/", "_")
+     end
+      
+      if File.exists?(filename) 
+       p "Skipping #{filename} as it already exists"
+      else
+       p "Downloading #{uri} to #{filename}..."
+       gotten = agent.get(uri)
+       gotten.save(filename)
+       p "Finished"
+      end
     end
   end
 end

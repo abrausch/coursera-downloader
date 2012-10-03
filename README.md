@@ -3,7 +3,9 @@ coursera-downloader
 
 Ruby script to download material from coursera courses
 
-Download all PDF and mp4 files to the current directory.
+Download all PDF, mp4, PowerPoint, and SRT subtitle files to the current directory.
+
+This script will also ONLY download things that have not already been stored in the local directory. It preserves filenames in accordance with the original content-disposition, as well.
 
 Usage: coursera-downloader.rb <username> <password> <course-name>
 
