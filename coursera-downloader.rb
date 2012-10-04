@@ -29,7 +29,7 @@ content_site.links.each do |link|
   unless (link.uri.to_s =~ URI::regexp).nil?
     uri = link.uri.to_s
     filename = ""
-    if (uri =~ /\.mp4/) || (uri =~ /\.srt/) || (uri =~ /\.pdf/) || (uri =~ /\.pptx/)
+    if (uri =~ /\.mp4/) || (uri =~ /srt/) || (uri =~ /\.pdf/) || (uri =~ /\.pptx/)
      begin
        head = agent.head(uri)
      rescue Mechanize::ResponseCodeError => exception
