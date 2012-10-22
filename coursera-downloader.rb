@@ -1,4 +1,5 @@
 require "mechanize"
+require "mechanize/http/content_disposition_parser"
 require "uri"
 
 if ARGV.size < 3
@@ -28,28 +29,39 @@ agent.pluggable_parser.default = Mechanize::Download
 content_site.links.each do |link|
   unless (link.uri.to_s =~ URI::regexp).nil?
     uri = link.uri.to_s
-    filename = ""
     if (uri =~ /\.mp4/) || (uri =~ /srt/) || (uri =~ /\.pdf/) || (uri =~ /\.pptx/)
-     begin
-       head = agent.head(uri)
-     rescue Mechanize::ResponseCodeError => exception
-       if exception.response_code == '403'
-         filename = URI.decode(exception.page.filename).gsub(/.*filename=\"(.*)\"+?.*/, '\1')
-       else
-         raise exception # Some other error, re-raise
-       end
-     else
-      filename = head.filename
-      filename = URI.decode(filename.gsub(/http.*\/\//,"")).gsub("_", " ").gsub("/", "_")
-     end
+      begin
+        head = agent.head(uri)
+      rescue Mechanize::ResponseCodeError => exception
+        if exception.response_code == '403'
+          filename = URI.decode(exception.page.filename).gsub(/.*filename=\"(.*)\"+?.*/, '\1')
+        else
+          raise exception # Some other error, re-raise
+        end
+      else
+        # First try to access direct the content-disposition header, because mechanize
+        # split the file at "/" and "\" and only use the last part. So we get trouble
+        # with "/" in filename.
+        if not head.response["Content-Disposition"].nil?
+          content_disposition = Mechanize::HTTP::ContentDispositionParser.parse head.response["Content-Disposition"]
+          filename = content_disposition.filename
+        end
+
+        # If we have no file found in the content disposition take the head filename
+        filename ||= head.filename
+        filename = URI.decode(filename.gsub(/http.*\/\//,""))
+      end
+
+      # Replace unwanted characters from the filename
+      filename = filename.gsub(":","").gsub("_","").gsub("/","_")
 
       if File.exists?(filename)
-       p "Skipping #{filename} as it already exists"
+        p "Skipping #{filename} as it already exists"
       else
-       p "Downloading #{uri} to #{filename}..."
-       gotten = agent.get(uri)
-       gotten.save(filename)
-       p "Finished"
+        p "Downloading #{uri} to #{filename}..."
+        gotten = agent.get(uri)
+        gotten.save(filename)
+        p "Finished"
       end
     end
   end
