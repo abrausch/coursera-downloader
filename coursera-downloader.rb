@@ -40,7 +40,7 @@ content_site.links.each do |link|
        end
      else
       filename = head.filename
-      filename = URI.decode(filename.gsub(/http.*\//,"")).gsub("_", " ").gsub("/", "_")
+      filename = URI.decode(filename.gsub(/http.*\/\//,"")).gsub("_", " ").gsub("/", "_")
      end
 
       if File.exists?(filename)
