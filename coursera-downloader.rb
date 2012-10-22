@@ -1,5 +1,5 @@
 require "mechanize"
-require "URI"
+require "uri"
 
 if ARGV.size < 3
   puts "coursera-downloader.rb <username> <password> <course>"
@@ -42,8 +42,8 @@ content_site.links.each do |link|
       filename = head.filename
       filename = URI.decode(filename.gsub(/http.*\//,"")).gsub("_", " ").gsub("/", "_")
      end
-      
-      if File.exists?(filename) 
+
+      if File.exists?(filename)
        p "Skipping #{filename} as it already exists"
       else
        p "Downloading #{uri} to #{filename}..."
