@@ -59,9 +59,17 @@ content_site.links.each do |link|
         p "Skipping #{filename} as it already exists"
       else
         p "Downloading #{uri} to #{filename}..."
-        gotten = agent.get(uri)
-        gotten.save(filename)
-        p "Finished"
+        begin
+          gotten = agent.get(uri)
+          gotten.save(filename)
+          p "Finished"
+        rescue Mechanize::ResponseCodeError => exception
+          if exception.response_code == '403'   
+            p "Failed to download #{filename} for #{exception}"
+          else
+            raise exception # Some other error, re-raise  
+          end
+        end
       end
     end
   end
