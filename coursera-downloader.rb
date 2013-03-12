@@ -44,7 +44,7 @@ content_site.links.each do |link|
         # with "/" in filename.
         if not head.response["Content-Disposition"].nil?
           content_disposition = Mechanize::HTTP::ContentDispositionParser.parse head.response["Content-Disposition"]
-          filename = content_disposition.filename
+          filename = content_disposition.filename if content_disposition
         end
 
         # If we have no file found in the content disposition take the head filename
@@ -64,10 +64,10 @@ content_site.links.each do |link|
           gotten.save(filename)
           p "Finished"
         rescue Mechanize::ResponseCodeError => exception
-          if exception.response_code == '403'   
+          if exception.response_code == '403'
             p "Failed to download #{filename} for #{exception}"
           else
-            raise exception # Some other error, re-raise  
+            raise exception # Some other error, re-raise
           end
         end
       end
